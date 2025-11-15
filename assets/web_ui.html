@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 AstrBot 指令管理器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS样式保持不变，与之前完全相同 */
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a5ce5;
+            --primary-light: #6b8aff;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --lighter: #ffffff;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --gray-lighter: #f1f5f9;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            --radius: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        body { 
+            font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+            line-height: 1.6;
+            font-size: 14px;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            height: calc(100vh - 40px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            background: var(--gradient);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-size: 2.4em;
+            margin-bottom: 12px;
+            font-weight: 800;
+            position: relative;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .header-badge {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            padding: 30px;
+            height: 100%;
+            overflow: hidden;
+            background: var(--gray-lighter);
+        }
+
+        .panel {
+            background: var(--lighter);
+            border-radius: var(--radius);
+            padding: 25px;
+            border: 1px solid var(--gray-light);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .panel h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--gray-lighter);
+            font-size: 1.4em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel h2 i {
+            color: var(--primary);
+            font-size: 1.2em;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            padding: 5px;
+            flex: 1;
+        }
+
+        .command-item {
+            background: var(--lighter);
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius);
+            padding: 18px;
+            cursor: grab;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            border-left: 4px solid var(--primary);
+        }
+
+        .command-item:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .command-item:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+        }
+
+        .command-item.dragging {
+            opacity: 0.6;
+            transform: rotate(5deg);
+        }
+
+        .command-name {
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .command-name::before {
+            content: '/';
+            color: var(--gray);
+            font-weight: 400;
+        }
+
+        .command-desc {
+            color: var(--gray);
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .command-plugin {
+            font-size: 0.85em;
+            color: var(--accent);
+            background: rgba(6, 182, 212, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            align-self: flex-start;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .categories-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            flex: 1;
+            padding: 5px;
+        }
+
+        .category {
+            background: var(--lighter);
+            border: 2px dashed var(--gray-light);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .category:hover {
+            border-color: var(--accent);
+            background: rgba(6, 182, 212, 0.02);
+        }
+
+        .category.drag-over {
+            border-color: var(--primary);
+            background: rgba(74, 108, 247, 0.05);
+            transform: scale(1.02);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gray-lighter);
+        }
+
+        .category-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-commands {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .category-command {
+            background: var(--gray-lighter);
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95em;
+            transition: var(--transition);
+            border-left: 3px solid var(--success);
+        }
+
+        .category-command:hover {
+            background: var(--lighter);
+            transform: translateX(5px);
+        }
+
+        .category-command-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .category-command-desc {
+            color: var(--gray);
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+
+        .btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger { 
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        }
+
+        .btn-success { 
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: var(--transition);
+            background: var(--lighter);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .status { 
+            padding: 15px; 
+            border-radius: var(--radius); 
+            margin: 15px 0; 
+            text-align: center;
+            font-size: 0.95em;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status.success { 
+            background: rgba(16, 185, 129, 0.1); 
+            color: var(--success);
+            border: 2px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status.error { 
+            background: rgba(239, 68, 68, 0.1); 
+            color: var(--danger);
+            border: 2px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 30px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            color: var(--primary);
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .empty-state small {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: var(--lighter);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px solid var(--gray-light);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: var(--gray);
+            margin-top: 8px;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .search-container .form-control {
+            padding-left: 45px;
+        }
+
+        /* 滚动条样式 */
+        .commands-grid::-webkit-scrollbar,
+        .categories-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .commands-grid::-webkit-scrollbar-track,
+        .categories-container::-webkit-scrollbar-track {
+            background: var(--gray-lighter);
+            border-radius: 4px;
+        }
+
+        .commands-grid::-webkit-scrollbar-thumb,
+        .categories-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .commands-grid::-webkit-scrollbar-thumb:hover,
+        .categories-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .commands-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                height: calc(100vh - 20px);
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .main-content {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-rocket"></i> AstrBot 指令管理器</h1>
+            <p>可视化管理和配置所有插件指令 • 智能分类与拖拽操作</p>
+            <div class="header-badge">
+                <i class="fas fa-star"></i> v1.3 • 腾天
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- 左侧：所有可用指令 -->
+            <div class="panel">
+                <h2><i class="fas fa-list-alt"></i> 可用指令库</h2>
+                
+                <div class="form-group search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search" class="form-control" placeholder="搜索指令名称、描述或插件...">
+                </div>
+                
+                <div class="commands-grid" id="allCommands">
+                    <div class="empty-state">
+                        <i class="fas fa-download"></i>
+                        <p>正在加载指令列表...</p>
+                        <small>请稍等，正在扫描所有插件</small>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalCommands">0</span>
+                        <span class="stat-label">总指令数</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalPlugins">0</span>
+                        <span class="stat-label">插件数量</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：自定义分类管理 -->
+            <div class="panel">
+                <h2><i class="fas fa-folder-tree"></i> 分类管理</h2>
+                
+                <div class="form-group">
+                    <input type="text" id="categoryName" class="form-control" placeholder="输入新分类名称...">
+                    <button class="btn btn-success" onclick="addCategory()" style="margin-top: 15px; width: 100%;">
+                        <i class="fas fa-plus"></i> 创建新分类
+                    </button>
+                </div>
+                
+                <div class="categories-container" id="categoriesContainer">
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>暂无分类配置</p>
+                        <small>将左侧指令拖拽到此处创建分类</small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" id="saveConfigBtn" onclick="saveConfig()" style="width: 100%;">
+                        <i class="fas fa-save"></i> 保存配置
+                    </button>
+                </div>
+                
+                <div id="statusMessage"></div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="configuredCommands">0</span>
+                        <span class="stat-label">已配置指令</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalCategories">0</span>
+                        <span class="stat-label">分类数量</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCommands = [];
+        let categories = [];
+        let draggedCommand = null;
+
+        // 获取所有已添加的命令名
+        function getAllAddedCommands() {
+            const addedCommands = new Set();
+            categories.forEach(category => {
+                category.commands.forEach(cmd => {
+                    addedCommands.add(cmd.name);
+                });
+            });
+            return addedCommands;
+        }
+
+        // 加载数据
+        async function loadData() {
+            try {
+                showLoadingState();
+                const [commandsResponse, configResponse] = await Promise.all([
+                    fetch('/api/all-commands'),
+                    fetch('/api/commands')
+                ]);
+                
+                if (!commandsResponse.ok || !configResponse.ok) {
+                    throw new Error('API请求失败');
+                }
+                
+                allCommands = await commandsResponse.json();
+                const config = await configResponse.json();
+                categories = config.categories || [];
+                
+                renderAllCommands();
+                renderCategories();
+                updateStats();
+                
+                console.log('数据加载成功');
+                
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                showErrorState('加载数据失败，请刷新页面重试');
+            }
+        }
+
+        function showLoadingState() {
+            const allCommandsContainer = document.getElementById('allCommands');
+            allCommandsContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>正在加载指令列表...</p>
+                    <small>扫描中，请耐心等待</small>
+                </div>
+            `;
+        }
+
+        function showErrorState(message) {
+            const allCommandsContainer = document.getElementById('allCommands');
+            allCommandsContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${message}</p>
+                    <button class="btn btn-outline" onclick="loadData()" style="margin-top: 15px;">
+                        <i class="fas fa-redo"></i> 重新加载
+                    </button>
+                </div>
+            `;
+        }
+
+        // 渲染所有指令（过滤已添加的）
+        function renderAllCommands() {
+            const container = document.getElementById('allCommands');
+            const addedCommands = getAllAddedCommands();
+            
+            if (Object.keys(allCommands).length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-ban"></i>
+                        <p>没有找到任何指令</p>
+                        <small>请确保有其他插件已安装并启用</small>
+                </div>
+                `;
+                return;
+            }
+            
+            let availableCommands = [];
+            
+            // 收集所有未添加的指令
+            Object.keys(allCommands).forEach(pluginName => {
+                allCommands[pluginName].forEach(cmd => {
+                    const [name, desc] = cmd.split('#');
+                    if (!addedCommands.has(name)) {
+                        availableCommands.push({ name, desc, plugin: pluginName });
+                    }
+                });
+            });
+            
+            if (availableCommands.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>所有指令都已添加到分类中</p>
+                        <small>您可以在右侧管理分类</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            availableCommands.forEach(cmd => {
+                const item = document.createElement('div');
+                item.className = 'command-item';
+                item.draggable = true;
+                item.innerHTML = `
+                    <div class="command-name">${cmd.name}</div>
+                    <div class="command-desc">${cmd.desc || '该指令暂无描述信息'}</div>
+                    <div class="command-plugin">${cmd.plugin}</div>
+                `;
+                
+                // 拖拽事件
+                item.addEventListener('dragstart', (e) => {
+                    draggedCommand = { name: cmd.name, desc: cmd.desc, plugin: cmd.plugin };
+                    e.dataTransfer.setData('text/plain', cmd.name);
+                    e.dataTransfer.effectAllowed = 'move';
+                    item.classList.add('dragging');
+                });
+                
+                item.addEventListener('dragend', (e) => {
+                    item.classList.remove('dragging');
+                });
+                
+                container.appendChild(item);
+            });
+        }
+
+        // 渲染分类
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            
+            if (categories.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-plus"></i>
+                        <p>暂无分类配置</p>
+                        <small>将左侧指令拖拽到此处创建分类</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            categories.forEach((category, index) => {
+                const categoryEl = document.createElement('div');
+                categoryEl.className = 'category';
+                categoryEl.innerHTML = `
+                    <div class="category-header">
+                        <span class="category-title">
+                            <i class="fas fa-folder"></i> ${category.name}
+                        </span>
+                        <button class="btn btn-danger" onclick="removeCategory(${index})">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                    <div class="category-commands" 
+                         ondrop="dropCommand(event, ${index})" 
+                         ondragover="allowDrop(event)"
+                         ondragenter="highlightCategory(event)"
+                         ondragleave="unhighlightCategory(event)">
+                        ${category.commands.length > 0 ? 
+                            category.commands.map(cmd => `
+                                <div class="category-command">
+                                    <div>
+                                        <div class="category-command-name">/${cmd.name}</div>
+                                        <div class="category-command-desc">${cmd.desc || '该指令暂无描述信息'}</div>
+                                    </div>
+                                    <button class="btn btn-danger" onclick="removeCommand(${index}, '${cmd.name}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `).join('') : 
+                            `<div class="empty-state" style="padding: 30px;">
+                                <i class="fas fa-arrow-left"></i>
+                                <p>将指令拖拽到这里</p>
+                            </div>`
+                        }
+                    </div>
+                `;
+                container.appendChild(categoryEl);
+            });
+        }
+
+        // 拖放功能
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = 'move';
+        }
+
+        function highlightCategory(ev) {
+            ev.currentTarget.parentElement.classList.add('drag-over');
+        }
+
+        function unhighlightCategory(ev) {
+            ev.currentTarget.parentElement.classList.remove('drag-over');
+        }
+
+        function dropCommand(ev, categoryIndex) {
+            ev.preventDefault();
+            ev.currentTarget.parentElement.classList.remove('drag-over');
+            
+            if (draggedCommand) {
+                const existingCommand = categories[categoryIndex].commands.find(cmd => cmd.name === draggedCommand.name);
+                if (!existingCommand) {
+                    categories[categoryIndex].commands.push({
+                        name: draggedCommand.name,
+                        desc: draggedCommand.desc,
+                        plugin: draggedCommand.plugin
+                    });
+                    renderAllCommands();
+                    renderCategories();
+                    updateStats();
+                    
+                    // 显示成功提示
+                    showStatus(`指令 "${draggedCommand.name}" 已添加到分类`, 'success');
+                }
+                draggedCommand = null;
+            }
+        }
+
+        // 分类管理
+        function addCategory() {
+            const nameInput = document.getElementById('categoryName');
+            const name = nameInput.value.trim();
+            
+            if (name) {
+                categories.push({
+                    name: name,
+                    commands: []
+                });
+                nameInput.value = '';
+                renderCategories();
+                updateStats();
+                showStatus(`分类 "${name}" 创建成功`, 'success');
+            } else {
+                showStatus('请输入分类名称', 'error');
+            }
+        }
+
+        function removeCategory(index) {
+            const categoryName = categories[index].name;
+            if (confirm(`确定要删除分类 "${categoryName}" 吗？此操作无法撤销。`)) {
+                categories.splice(index, 1);
+                renderAllCommands();
+                renderCategories();
+                updateStats();
+                showStatus(`分类 "${categoryName}" 已删除`, 'success');
+            }
+        }
+
+        function removeCommand(categoryIndex, commandName) {
+            const category = categories[categoryIndex];
+            category.commands = category.commands.filter(cmd => cmd.name !== commandName);
+            renderAllCommands();
+            renderCategories();
+            updateStats();
+            showStatus(`指令 "${commandName}" 已从分类中移除`, 'success');
+        }
+
+        // 搜索过滤
+        function filterCommands() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const items = document.querySelectorAll('#allCommands .command-item');
+            let visibleCount = 0;
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const isVisible = text.includes(searchTerm);
+                item.style.display = isVisible ? 'flex' : 'none';
+                if (isVisible) visibleCount++;
+            });
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const totalCommands = Object.values(allCommands).flat().length;
+            const totalPlugins = Object.keys(allCommands).length;
+            const configuredCommands = categories.flatMap(cat => cat.commands).length;
+            const totalCategories = categories.length;
+            
+            document.getElementById('totalCommands').textContent = totalCommands;
+            document.getElementById('totalPlugins').textContent = totalPlugins;
+            document.getElementById('configuredCommands').textContent = configuredCommands;
+            document.getElementById('totalCategories').textContent = totalCategories;
+        }
+
+        // 显示状态消息
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.innerHTML = `<div class="status ${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                statusEl.innerHTML = '';
+            }, 4000);
+        }
+
+        // 保存配置 - 修复版本
+        async function saveConfig() {
+            const saveBtn = document.getElementById('saveConfigBtn');
+            const originalText = saveBtn.innerHTML;
+            const originalDisabled = saveBtn.disabled;
+            
+            try {
+                // 禁用按钮并显示加载状态
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<div class="loader"></div> 保存中...';
+                
+                const response = await fetch('/api/save-config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ categories })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ 配置保存成功！', 'success');
+                } else {
+                    showStatus('❌ 保存失败：' + (result.error || '未知错误'), 'error');
+                }
+                
+            } catch (error) {
+                console.error('保存配置失败:', error);
+                showStatus('❌ 保存失败：网络错误', 'error');
+            } finally {
+                // 恢复按钮状态
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                }, 1000);
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', loadData);
+        document.getElementById('search').addEventListener('input', filterCommands);
+        
+        // 防止浏览器默认拖拽行为
+        document.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('drop', function(e) {
+            e.preventDefault();
+        });
+
+        // 回车键添加分类
+        document.getElementById('categoryName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCategory();
+            }
+        });
+    </script>
+</body>
+</html>
